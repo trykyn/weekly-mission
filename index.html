@@ -98,7 +98,11 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } };
   let S = load() || { people: [], kids: {}, cur: '', tab: 'ms' };
   S.people = Array.isArray(S.people) ? S.people : []; S.kids = S.kids || {};
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+  let saveT = 0;
+  const saveNow = () => { clearTimeout(saveT); saveT = 0; try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+  const save = () => { if (!saveT) saveT = setTimeout(saveNow, 300); }; // 한 번에 여러 개 바뀌어도 (코인 20개 등) 한 번만 저장
+  window.addEventListener('pagehide', saveNow);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveNow(); });
   const lang = 'ko';
   function h(tag, props, ...kids) {
     const e = document.createElement(tag);
@@ -265,6 +269,24 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
     document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
     toast('백업 파일을 저장했어요');
   }
+  // 백업 파일은 밖에서 온 것: 사람 4명 · 아는 칸만 받고, 숫자여야 하는 칸은 숫자로 (이상한 파일이면 null)
+  function cleanBackup(d) {
+    const obj = (x) => x && typeof x === 'object' && !Array.isArray(x);
+    if (!obj(d) || !Array.isArray(d.people) || !obj(d.kids)) return null;
+    const people = d.people.filter((p) => obj(p) && /^p[1-4]$/.test(p.k)).slice(0, 4)
+      .map((p) => ({ k: p.k, name: String(p.name || '?').slice(0, 10), set: p.set === 'ping' ? 'ping' : 'poke', av: String(p.av || '🐻').slice(0, 4) }));
+    if (!people.length || new Set(people.map((p) => p.k)).size !== people.length) return null;
+    const kids = {};
+    for (const p of people) {
+      const k = obj(d.kids[p.k]) ? d.kids[p.k] : {};
+      for (const g of ['stickers', 'golds']) if (obj(k[g])) for (const [id, x] of Object.entries(k[g])) { if (obj(x)) x.d = Number(x.d) || 0; else delete k[g][id]; }
+      if (k.missions != null && !Array.isArray(k.missions)) delete k.missions;
+      if (Array.isArray(k.missions)) k.missions = k.missions.filter((x) => obj(x) && typeof x.id === 'string').map((x) => ({ ...x, text: x.text == null ? undefined : String(x.text).slice(0, 40) }));
+      for (const g of ['cfg', 'mdone', 'room']) if (k[g] != null && !obj(k[g])) delete k[g];
+      kids[p.k] = k;
+    }
+    return { people, kids };
+  }
   function importData() {
     const inp = h('input', { type: 'file', accept: '.json,application/json', style: 'display:none' });
     inp.addEventListener('change', async () => {
@@ -272,11 +294,13 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
       inp.remove();
       if (!f) return;
       try {
+        if (f.size > 3e6) throw new Error('big');
         const j = JSON.parse(await f.text()), d = j && j.app === 'weekly-mission' ? j.data : null;
-        if (!d || !Array.isArray(d.people) || !d.kids || typeof d.kids !== 'object') throw new Error('bad');
-        if (!confirm(`백업 파일 (${d.people.map((p) => p.name).join(', ')}) 로 지금 기록을 바꿀까요?`)) return;
-        S.people = d.people.slice(0, 4); S.kids = d.kids; S.cur = (S.people[0] || {}).k || '';
-        save(); closeCfg(); roomOff(); boardOff(); render(); toast('백업을 불러왔어요');
+        const v = cleanBackup(d);
+        if (!v) throw new Error('bad');
+        if (!confirm(`백업 파일 (${v.people.map((p) => p.name).join(', ')}) 로 지금 기록을 바꿀까요?`)) return;
+        S.people = v.people; S.kids = v.kids; S.cur = v.people[0].k;
+        saveNow(); closeCfg(); roomOff(); boardOff(); render(); toast('백업을 불러왔어요');
       } catch { alert('백업 파일을 읽을 수 없어요'); }
     });
     document.body.append(inp); inp.click();
