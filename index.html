@@ -61,6 +61,10 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
 .custom-list button { border: 0; background: none; color: #C0392B; font-size: 16px; }
 .welcome { text-align: center; padding: 30px 10px; }
 .welcome .big-e { font-size: 64px; }
+.tip { display: flex; gap: 10px; align-items: flex-start; background: #FFF1D6; border: 2px dashed #FFC98A; border-radius: 16px; padding: 10px 12px; margin-bottom: 10px; font-size: 15px; line-height: 1.35; }
+.tip > span { font-size: 24px; } .tip b { display: block; font-weight: 400; font-size: 17px; }
+.tip button { margin-left: auto; border: 0; background: none; font-size: 18px; color: var(--muted); padding: 0 4px; }
+.backup { display: flex; gap: 8px; flex-wrap: wrap; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #4A2E14; color: #fff; padding: 10px 16px; border-radius: 14px; font-size: 15px; z-index: 60; }
 </style>
 </head>
@@ -70,6 +74,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
     <h1>🎯 우리 주간 미션</h1>
     <button class="icon-btn" id="cfg-btn" type="button" aria-label="설정">⚙️</button>
   </header>
+  <div id="tip"></div>
   <div class="people" id="people" role="tablist"></div>
   <div class="tabs" id="tabs" role="tablist">
     <button type="button" role="tab" data-tab="ms">🎯 미션</button>
@@ -228,6 +233,9 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
       h('p', { class: 'sub', text: '기록은 이 기기에만 저장돼요. 미션은 매일, 「가방 챙기기」는 평일만.' }),
       ...cards,
       draft.people.length < 4 ? h('button', { type: 'button', class: 'btn ghost', style: 'width:100%;margin-bottom:12px', text: '+ 사람 추가 (최대 4명)', onclick: () => { addPerson(); renderCfg(); } }) : null,
+      S.people.length ? h('div', { class: 'pcard' }, h('div', { class: 'row', style: 'margin-bottom:4px' }, h('b', { text: '💾 기록 백업' })),
+        h('p', { class: 'sub', text: '휴대폰을 바꾸거나 기록이 지워져도 다시 불러올 수 있어요. 가끔 저장해 두세요.' }),
+        h('div', { class: 'backup' }, h('button', { type: 'button', class: 'btn ghost', text: '💾 백업 파일 저장', onclick: exportData }), h('button', { type: 'button', class: 'btn ghost', text: '📂 백업 불러오기', onclick: importData }))) : null,
       h('button', { type: 'button', class: 'btn', style: 'width:100%;padding:13px;font-size:18px', text: '저장', onclick: saveCfg }));
   }
   function saveCfg() {
@@ -243,6 +251,48 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
     if (!person(S.cur)) S.cur = S.people[0].k;
     save(); closeCfg(); roomOff(); boardOff(); render(); toast('저장했어요');
   }
+  /* ── 💾 백업: 기록은 이 기기에만 있어서 파일로 저장 · 불러오기 ── */
+  async function exportData() {
+    const txt = JSON.stringify({ app: 'weekly-mission', v: 1, at: Date.now(), data: { people: S.people, kids: S.kids } });
+    const name = `주간미션-백업-${today()}.json`;
+    try {
+      const file = new File([txt], name, { type: 'application/json' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); toast('백업 파일을 저장했어요'); return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    const a = h('a', { href: URL.createObjectURL(new Blob([txt], { type: 'application/json' })), download: name });
+    document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('백업 파일을 저장했어요');
+  }
+  function importData() {
+    const inp = h('input', { type: 'file', accept: '.json,application/json', style: 'display:none' });
+    inp.addEventListener('change', async () => {
+      const f = inp.files && inp.files[0];
+      inp.remove();
+      if (!f) return;
+      try {
+        const j = JSON.parse(await f.text()), d = j && j.app === 'weekly-mission' ? j.data : null;
+        if (!d || !Array.isArray(d.people) || !d.kids || typeof d.kids !== 'object') throw new Error('bad');
+        if (!confirm(`백업 파일 (${d.people.map((p) => p.name).join(', ')}) 로 지금 기록을 바꿀까요?`)) return;
+        S.people = d.people.slice(0, 4); S.kids = d.kids; S.cur = (S.people[0] || {}).k || '';
+        save(); closeCfg(); roomOff(); boardOff(); render(); toast('백업을 불러왔어요');
+      } catch { alert('백업 파일을 읽을 수 없어요'); }
+    });
+    document.body.append(inp); inp.click();
+  }
+  /* ── 📲 홈 화면에 추가 안내: 아이폰 Safari 는 홈 화면 앱이 아니면 한동안 안 열 때 기록을 지울 수 있음 ── */
+  const standalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  function showTip() {
+    let off = false;
+    try { off = localStorage.getItem('weekly-mission:tip') === 'off'; } catch {}
+    if (standalone() || off) { $('#tip').replaceChildren(); return; }
+    const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    $('#tip').replaceChildren(h('div', { class: 'tip' }, h('span', { text: '📲' }),
+      h('div', {}, h('b', { text: '홈 화면에 추가해 주세요' }), ios ? 'Safari 아래 [공유] → [홈 화면에 추가]. 그래야 기록이 안전하게 남아요.' : '브라우저 메뉴(⋮) → [홈 화면에 추가]. 그래야 기록이 안전하게 남아요.'),
+      h('button', { type: 'button', 'aria-label': '닫기', text: '✕', onclick: () => { try { localStorage.setItem('weekly-mission:tip', 'off'); } catch {} showTip(); } })));
+  }
+  showTip();
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch {} // 기록을 함부로 지우지 말아 달라고 브라우저에 부탁
+
   $('#cfg-btn').addEventListener('click', openCfg);
   $('#sheet').addEventListener('click', (e) => { if (e.target.id === 'sheet') closeCfg(); });
 
