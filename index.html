@@ -39,6 +39,7 @@ header h1 { margin: 0; font-size: 24px; font-weight: 400; flex: 1; }
 .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
 .tile { border: 0; border-radius: 16px; background: #FFF4E4; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 15px; min-height: 92px; transition: transform .1s; }
 .tile .e { font-size: 32px; line-height: 1.1; }
+.tile .e .mi { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: middle; }
 .tile.done { background: #DDF5DF; box-shadow: inset 0 0 0 3px #4CBF5A; }
 .tile:active { transform: scale(.95); }
 .claim, .got { width: 100%; margin-top: 10px; border: 0; border-radius: 16px; padding: 14px; font-size: 19px; text-align: center; }
@@ -220,7 +221,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
         write(k, ['mdone', day, x.id], on ? true : null); SND.tap(on ? 3 : 1);
         render();
         if (on && M.done + 1 === M.total) setTimeout(() => openGift(k), 350);
-      } }, h('span', { class: 'e', text: FS.missionIcon(x) }), h('span', { text: FS.missionLabel(x, lang) }))))
+      } }, FS.missionIconHTML ? h('span', { class: 'e', html: FS.missionIconHTML(x) }) : h('span', { class: 'e', text: FS.missionIcon(x) }), h('span', { text: FS.missionLabel(x, lang) }))))
         : h('p', { class: 'empty-ms', text: '⚙️ 설정에서 미션을 골라 주세요' }),
       M.got ? h('div', { class: 'got', text: '✅ 오늘 선물을 받았어요!' }) : M.all ? h('button', { type: 'button', class: 'claim', text: '🎁 선물 상자 열기', onclick: () => openGift(k) }) : null);
     const golds = h('div', { class: 'gold-row' });
