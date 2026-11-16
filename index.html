@@ -156,7 +156,9 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
     $('#people').replaceChildren(...S.people.map((p, i) => h('button', { type: 'button', role: 'tab', 'aria-pressed': String(p.k === k), style: `--pc:${PC[i % 4]}`,
       onclick: () => { if (S.cur === p.k) return; S.cur = p.k; save(); roomOff(); SND.tap(1); render(); } }, h('span', { class: 'av', text: p.av || '🐻' }), p.name || '?')));
     $('#tabs').hidden = false;
-    $('#room-tab').textContent = setOf(k) === 'ping' ? '💖 티니핑' : '🥚 포켓몬';
+    { const t = $('#room-tab'), P = setOf(k) === 'ping'; t.replaceChildren(); // 몬스터볼 · 하츄핑 그림 (공통 poke-room.js)
+      if (window.PokeRoom && window.PokeRoom.tabIcon) t.insertAdjacentHTML('beforeend', window.PokeRoom.tabIcon(k)); else t.append(P ? '💖' : '🥚');
+      t.append(P ? ' 티니핑' : ' 포켓몬'); }
     for (const b of document.querySelectorAll('[data-tab]')) b.setAttribute('aria-selected', String(b.dataset.tab === S.tab));
     if (S.tab === 'room' && window.PokeRoom) {
       boardOff(); $('#main').replaceChildren(); $('#room-box').hidden = false;
