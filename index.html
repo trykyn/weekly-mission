@@ -34,46 +34,9 @@ header h1 { margin: 0; font-size: 24px; font-weight: 400; flex: 1; }
 .tabs button { height: 50px; border: 0; border-radius: 16px; background: var(--card); font-size: 18px; color: var(--muted); box-shadow: 0 2px 8px rgba(120,70,20,.06); }
 .tabs button[aria-selected="true"] { background: linear-gradient(140deg, #FFE08A, #FFB46B); color: var(--ink); }
 .card { background: var(--card); border-radius: 22px; padding: 14px; box-shadow: 0 4px 16px rgba(120,70,20,.08); margin-bottom: 12px; }
-.ms-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; font-size: 19px; }
-.ms-h span { color: var(--muted); font-size: 16px; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
-.tile { border: 0; border-radius: 16px; background: #FFF4E4; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 15px; min-height: 92px; transition: transform .1s; }
-.tile .e { font-size: 32px; line-height: 1.1; }
-.tile .e .mi { width: 1.15em; height: 1.15em; display: inline-block; vertical-align: middle; }
-.tile.done { background: #DDF5DF; box-shadow: inset 0 0 0 3px #4CBF5A; }
-.tile:active { transform: scale(.95); }
-.claim, .got { width: 100%; margin-top: 10px; border: 0; border-radius: 16px; padding: 14px; font-size: 19px; text-align: center; }
-.claim { background: var(--accent); color: #fff; } .got { background: #EAF7EC; color: #2E7D3A; }
-.empty-ms { color: var(--muted); text-align: center; padding: 10px; }
-.gold-row { display: flex; gap: 8px; align-items: center; justify-content: center; margin-bottom: 8px; }
-.big { width: 64px; height: 64px; border: 0; border-radius: 50%; background: #FFF4D6; display: grid; place-items: center; color: #E8C66A; font-size: 26px; padding: 0; }
-.big svg { width: 100%; height: 100%; }
-.big-gift { font-size: 34px; filter: grayscale(1); opacity: .5; } .big-gift.ready { filter: none; opacity: 1; animation: wob 1.2s infinite; }
-.reward { text-align: center; color: var(--muted); font-size: 16px; margin-bottom: 10px; }
-.board-h { display: flex; justify-content: space-between; margin: 4px 2px 8px; font-size: 17px; }
-.board { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
-.slot { aspect-ratio: 1; border: 2px dashed #F0D9B8; border-radius: 16px; background: #FFFBF4; position: relative; display: grid; place-items: center; font-size: 22px; padding: 0; color: var(--muted); }
-.slot svg { width: 86%; height: 86%; }
-.slot .day { position: absolute; bottom: -1px; left: 0; right: 0; font-size: 12px; color: var(--muted); }
-.slot.today { border-color: var(--accent); border-style: solid; background: #FFF1E2; }
-.slot.got { border-style: solid; border-color: #FFE0B8; background: #fff; }
-.slot.off { background: #EEF6FF; border-color: #CFE3FA; }
-.slot.future { opacity: .55; }
-.hint { color: var(--muted); font-size: 14px; text-align: center; margin: 10px 0 0; }
-.done-banner { text-align: center; background: #FFF4D6; border-radius: 16px; padding: 12px; margin-top: 10px; }
-.done-banner button { margin-top: 8px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; padding: 8px 16px; }
-@keyframes wob { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-8deg); } 75% { transform: rotate(8deg); } }
-/* 선물 상자 */
-.gift-ov { position: fixed; inset: 0; z-index: 50; background: rgba(60,30,0,.45); display: grid; place-items: center; }
-.gift-card { background: #fff; border-radius: 28px; padding: 22px 26px; text-align: center; width: min(88vw, 360px); }
-.gift-card b { font-size: 22px; font-weight: 400; display: block; margin-bottom: 8px; }
-.gift-card .gift { border: 0; background: none; width: 170px; height: 170px; padding: 0; }
-.gift-card .gift svg, .gift-card .reveal svg { width: 100%; height: 100%; }
-.gift-card .gift.shake { animation: wob .4s; }
-.gift-card .reveal { width: 170px; height: 170px; margin: 0 auto; animation: pop .5s; }
-@keyframes pop { 0% { transform: scale(.2); } 70% { transform: scale(1.15); } 100% { transform: scale(1); } }
-.taps { display: flex; gap: 8px; justify-content: center; margin: 8px 0; } .taps i { width: 14px; height: 14px; border-radius: 50%; background: #F0D9B8; } .taps i.on { background: var(--accent); }
-.gift-card .msg { color: var(--muted); font-size: 16px; }
+/* 미션판 색 (공통 mission-board.js 의 변수) */
+.mb { --mb-k1: #FFE08A; --mb-k2: #FFB46B; --mb-kc: #B8650A; --mb-soft: #FFF4E4; --mb-line: #F0D9B8; --mb-muted: #9A7A5A; --mb-font: var(--font); }
+.mb-gift-card { --mb-font: var(--font); }
 /* 설정 */
 .sheet { position: fixed; inset: 0; z-index: 40; background: rgba(60,30,0,.4); display: flex; align-items: flex-end; justify-content: center; }
 .sheet[hidden] { display: none; }
@@ -99,9 +62,6 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
 .welcome { text-align: center; padding: 30px 10px; }
 .welcome .big-e { font-size: 64px; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #4A2E14; color: #fff; padding: 10px 16px; border-radius: 14px; font-size: 15px; z-index: 60; }
-.confetti { position: fixed; width: 10px; height: 14px; border-radius: 3px; z-index: 55; pointer-events: none; animation: conf 1.1s ease-out forwards; }
-@keyframes conf { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
-@media (min-width: 760px) { .tiles { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); } .big { width: 80px; height: 80px; } }
 </style>
 </head>
 <body>
@@ -122,6 +82,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
 
 <script src="../our-family/stickers-shared.js"></script>
 <script src="../our-family/poke-room.js"></script>
+<script src="../our-family/mission-board.js"></script>
 <script>
 (() => {
   'use strict';
@@ -149,14 +110,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
   const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const SND = (FS && FS.SND) || { tap() {}, tada() {}, boing() {}, stick() {}, coin() {} };
   function toast(t) { const e = h('div', { class: 'toast', text: t }); document.body.append(e); setTimeout(() => e.remove(), 2200); }
-  function confetti(el, n = 30) {
-    const r = el.getBoundingClientRect(), colors = ['#FF6B6B', '#FFD23F', '#5BC0EB', '#9BE564', '#C79BF2', '#FF9F1C', '#FF7EB6'];
-    for (let i = 0; i < n; i++) {
-      const a = Math.random() * Math.PI * 2, d = 70 + Math.random() * 130;
-      const p = h('i', { class: 'confetti', style: `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;background:${colors[i % colors.length]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d - 70}px;--rot:${Math.random() * 720 - 360}deg` });
-      document.body.append(p); setTimeout(() => p.remove(), 1200);
-    }
-  }
+
 
   /* ── 공통 파일은 아이 이름(다빈 = 포켓몬, 아린 = 티니핑)으로 그림을 고름 → 여기서는 사람마다 고른 세트로 바꿔 줌 ── */
   const person = (k) => S.people.find((p) => p.k === k);
@@ -189,7 +143,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
   let roomCtl = null;
   function render() {
     if (!FS) { $('#main').replaceChildren(h('div', { class: 'card welcome' }, h('div', { class: 'big-e', text: '📶' }), h('p', { text: '처음 한 번은 인터넷이 필요해요. 연결한 뒤 다시 열어 주세요.' }))); return; }
-    if (!S.people.length) { $('#people').replaceChildren(); $('#tabs').hidden = true; $('#room-box').hidden = true; roomOff();
+    if (!S.people.length) { $('#people').replaceChildren(); $('#tabs').hidden = true; $('#room-box').hidden = true; roomOff(); boardOff();
       $('#main').replaceChildren(h('div', { class: 'card welcome' }, h('div', { class: 'big-e', text: '🎯' }), h('p', { text: '아이 이름을 넣고 미션을 골라 주세요.' }), h('button', { class: 'btn', type: 'button', text: '시작하기', onclick: openCfg })));
       return; }
     if (!person(S.cur)) S.cur = S.people[0].k;
@@ -200,7 +154,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
     $('#room-tab').textContent = setOf(k) === 'ping' ? '💖 티니핑' : '🥚 포켓몬';
     for (const b of document.querySelectorAll('[data-tab]')) b.setAttribute('aria-selected', String(b.dataset.tab === S.tab));
     if (S.tab === 'room' && window.PokeRoom) {
-      $('#main').replaceChildren(); $('#room-box').hidden = false;
+      boardOff(); $('#main').replaceChildren(); $('#room-box').hidden = false;
       if (!roomCtl || roomCtl.k !== k) { roomOff(); roomCtl = window.PokeRoom.mount($('#room-box'), { kid: k, lang: () => lang, data: () => kid(k), write: (path, v) => { write(k, path, v); queueRoom(); }, snd: SND, big: window.innerWidth >= 760 }); roomCtl.k = k; }
       else roomCtl.update();
     } else { roomOff(); $('#room-box').hidden = true; renderMissions(k); }
@@ -210,79 +164,19 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
   function roomOff() { if (roomCtl) { roomCtl.destroy(); roomCtl = null; } }
   for (const b of document.querySelectorAll('[data-tab]')) b.addEventListener('click', () => { S.tab = b.dataset.tab; save(); SND.tap(2); render(); });
 
-  /* ── 🎯 미션 · 주간 미션판 · 황금 스티커 ── */
+  /* ── 🎯 미션 · 선물 상자 · 주간 미션판 · 황금 스티커: 우리가족 앱과 같은 공통 파일(../our-family/mission-board.js) ── */
+  let boardCtl = null;
+  function boardOff() { if (boardCtl) { boardCtl.destroy(); boardCtl = null; } }
   function renderMissions(k) {
-    const kd = kid(k), day = today(), M = FS.missionState(kd, k, day), W = FS.weekState(kd, k, day), G = FS.goldState(kd, k), c = FS.cfgOf(kd, k);
-    const labels = FS.WEEK_LABEL.ko;
-    const ms = h('div', { class: 'card' }, h('div', { class: 'ms-h' }, h('b', { text: '오늘의 미션' }), h('span', { text: `${M.done} / ${M.total}` })),
-      M.total ? h('div', { class: 'tiles' }, ...M.list.map((x) => h('button', { type: 'button', class: 'tile' + (M.day[x.id] ? ' done' : ''), onclick: () => {
-        if (M.got) { toast('오늘 선물은 이미 받았어요'); return; }
-        const on = !M.day[x.id];
-        write(k, ['mdone', day, x.id], on ? true : null); SND.tap(on ? 3 : 1);
-        render();
-        if (on && M.done + 1 === M.total) setTimeout(() => openGift(k), 350);
-      } }, FS.missionIconHTML ? h('span', { class: 'e', html: FS.missionIconHTML(x) }) : h('span', { class: 'e', text: FS.missionIcon(x) }), h('span', { text: FS.missionLabel(x, lang) }))))
-        : h('p', { class: 'empty-ms', text: '⚙️ 설정에서 미션을 골라 주세요' }),
-      M.got ? h('div', { class: 'got', text: '✅ 오늘 선물을 받았어요!' }) : M.all ? h('button', { type: 'button', class: 'claim', text: '🎁 선물 상자 열기', onclick: () => openGift(k) }) : null);
-    const golds = h('div', { class: 'gold-row' });
-    for (let i = 0; i < G.need; i++) {
-      const g = G.golds[i];
-      golds.append(g ? h('button', { type: 'button', class: 'big', html: FS.bigSVG(k, g.d || 0), onclick: () => SND.stick() }) : h('span', { class: 'big', text: '★' }));
-    }
-    golds.append(h('span', { class: 'big-gift' + (G.gift ? ' ready' : ''), text: '🎁' }));
-    const board = h('div', { class: 'board' }, ...W.days.map((x) => h('button', { type: 'button', class: `slot ${x.got ? 'got' : x.off ? 'off' : x.status}`, onclick: () => tapDay(k, x),
-      html: x.got ? FS.stickerSVG(k, x.d) : '' }, x.got ? null : (x.sick ? '🤒' : x.off ? '🏖️' : x.status === 'missed' ? '·' : x.status === 'today' ? '⭐' : ''), h('span', { class: 'day', text: labels[x.i] }))));
-    const wk = h('div', { class: 'card' }, golds, h('div', { class: 'reward', text: c.reward ? `🎁 ${c.reward} (황금 스티커 ${G.need}개)` : `황금 스티커 ${G.need}개를 모으면 선물! (⚙️에서 선물을 정해요)` }),
-      h('div', { class: 'board-h' }, h('b', { text: '이번 주' }), h('span', { text: `⭐ ${W.count} / 7` })), board,
-      G.gift ? h('div', { class: 'done-banner' }, h('b', { text: `🎉 황금 스티커 ${G.need}개를 다 모았어요!` }), c.reward ? h('div', { text: `🎁 ${c.reward}` }) : null,
-        h('button', { type: 'button', text: '새 판 시작', onclick: () => { if (!confirm('선물을 받았으면 새 판을 시작할까요?')) return; write(k, ['cfg'], { ...(kid(k).cfg || {}), start: Date.now() }); render(); } }))
-        : h('p', { class: 'hint', text: W.all ? '이번 주 7칸을 다 채웠어요! 🏅' : '7칸을 다 채우면 🏅 황금 스티커 · 아프거나 쉬는 날은 빈 칸을 눌러요' }));
-    $('#main').replaceChildren(ms, wk);
-  }
-  // 빈 칸: 쉬는 날 표시/해제 (오늘·지난 날만). 받은 스티커 칸은 톡 소리
-  function tapDay(k, x) {
-    if (x.got) { SND.boing(); return; }
-    if (x.status === 'future') return;
-    const day = today();
-    if (x.off) { if (!confirm('쉬는 날 표시를 지울까요?')) return; write(k, ['mdone', x.key, 'off'], null); write(k, ['mdone', x.key, 'sick'], null); render(); return; }
-    if (!confirm(`${FS.WEEK_LABEL.ko[x.i]}요일을 쉬는 날로 할까요? (아프거나 여행 간 날)`)) return;
-    if (FS.weekCompletesWithOff(kid(k), k, day, x.key)) { write(k, ['golds', FS.weekKeys(day)[0]], { at: Date.now(), d: FS.newRewardD() }); setTimeout(() => SND.tada(), 300); }
-    write(k, ['mdone', x.key, 'off'], true);
-    render();
-  }
-  // 🎁 선물 상자: 톡톡톡 3번 → 스티커 펑 → 오늘 칸에 붙고, 열매 + 🪙 가 방 가방에
-  function openGift(k) {
-    if (document.querySelector('.gift-ov')) return;
-    const M = FS.missionState(kid(k), k, today());
-    if (!M.all || M.got) return;
-    const d = FS.newRewardD();
-    let taps = 0;
-    const dots = h('div', { class: 'taps' }, h('i'), h('i'), h('i'));
-    const msg = h('p', { class: 'msg', text: '톡톡톡 3번 눌러요!' });
-    const gift = h('button', { type: 'button', class: 'gift', html: FS.giftSVG(k), onclick: () => {
-      if (taps >= 3) return;
-      taps++; SND.tap(taps);
-      [...dots.children].forEach((i, n) => i.classList.toggle('on', n < taps));
-      if (taps < 3) { gift.classList.remove('shake'); void gift.offsetWidth; gift.classList.add('shake'); return; }
-      SND.tada();
-      const rv = h('div', { class: 'reveal', html: FS.stickerSVG(k, d) });
-      gift.replaceWith(rv); dots.remove();
-      msg.textContent = `${FS.rewardText ? FS.rewardText(d, lang) : FS.rewardIcon(d)} 받았어요! ${setOf(k) === 'ping' ? '💖' : '🥚'} 방 가방에 넣어 뒀어요`;
-      confetti(rv, 36);
-      setTimeout(() => { ov.remove(); saveSticker(k, d); render(); }, 1700);
-    } });
-    const ov = h('div', { class: 'gift-ov' }, h('div', { class: 'gift-card' }, h('b', { text: '🎉 오늘 미션 성공!' }), gift, dots, msg));
-    document.body.append(ov);
-  }
-  function saveSticker(k, d) {
-    const id = newId(), day = today(), md = (kid(k).mdone || {})[day];
-    if (md && md.got) return;
-    if (FS.weekCompletesToday(kid(k), k, day)) { write(k, ['golds', FS.weekKeys(day)[0]], { at: Date.now(), d }); setTimeout(() => { SND.tada(); toast('🏅 황금 스티커를 받았어요!'); }, 500); }
-    write(k, ['mdone', day, 'got'], id);
-    write(k, ['stickers', id], { at: Date.now(), d, why: '@mission' });
-    const it = FS.rewardItem(d), R = FS.ROOM || 'room';
-    if (it) { write(k, [R, 'items', id], it); write(k, [R, 'items', id + 'c'], 'coin'); }
-    SND.stick();
+    const box = $('#main');
+    if (!window.MissionBoard) { box.replaceChildren(h('div', { class: 'card welcome' }, h('p', { text: '처음 한 번은 인터넷이 필요해요.' }))); return; }
+    if (boardCtl && boardCtl.k === k && box.contains(boardCtl.el)) { boardCtl.update(); return; }
+    boardOff();
+    const card = h('div', { class: 'card' });
+    box.replaceChildren(card);
+    boardCtl = window.MissionBoard.mount(card, { kid: k, lang: () => lang, data: () => kid(k), write: (path, v) => write(k, path, v), snd: SND, big: window.innerWidth >= 760,
+      text: { noReward: '선물 미정 (⚙️에서 정해요)', noMs: '⚙️ 설정에서 미션을 골라 주세요' } });
+    boardCtl.el = card;
   }
 
   /* ── ⚙️ 설정: 사람(이름 · 그림 · 포켓몬/티니핑) · 미션 · 선물 ── */
@@ -347,7 +241,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
       kd.cfg = { ...(kd.cfg || {}), reward: p.reward.trim(), big: p.big };
     }
     if (!person(S.cur)) S.cur = S.people[0].k;
-    save(); closeCfg(); roomOff(); render(); toast('저장했어요');
+    save(); closeCfg(); roomOff(); boardOff(); render(); toast('저장했어요');
   }
   $('#cfg-btn').addEventListener('click', openCfg);
   $('#sheet').addEventListener('click', (e) => { if (e.target.id === 'sheet') closeCfg(); });
