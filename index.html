@@ -39,7 +39,8 @@ header h1 { margin: 0; font-size: 24px; font-weight: 400; flex: 1; }
 .mb-gift-card { --mb-font: var(--font); }
 /* 설정 */
 .sheet { position: fixed; inset: 0; z-index: 40; background: rgba(60,30,0,.4); display: flex; align-items: flex-end; justify-content: center; }
-.sheet[hidden] { display: none; }
+.sheet[hidden], .tabs[hidden] { display: none; }
+.mb-gift, .mb-tile, .mb-slot, .tabs button { touch-action: manipulation; } /* 아이패드 · 폰: 빨리 톡톡 눌러도 확대되지 않게 */
 .sheet-card { background: var(--bg); width: min(100%, 720px); max-height: 92vh; overflow: auto; border-radius: 24px 24px 0 0; padding: 16px 16px calc(20px + env(safe-area-inset-bottom)); }
 .sheet-card h2 { margin: 0 0 4px; font-weight: 400; font-size: 22px; display: flex; justify-content: space-between; align-items: center; }
 .sheet-card .sub { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
@@ -203,7 +204,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
   function addPerson() {
     const used = new Set(draft.people.map((p) => p.k));
     let n = 1; while (used.has('p' + n)) n++;
-    draft.people.push({ k: 'p' + n, name: '', set: 'poke', av: AV[(n - 1) % AV.length], missions: DEFAULT_MS.map((id) => ({ id })), reward: '', big: 4 });
+    draft.people.push({ fresh: true, k: 'p' + n, name: '', set: 'poke', av: AV[(n - 1) % AV.length], missions: DEFAULT_MS.map((id) => ({ id })), reward: '', big: 4 });
   }
   function renderCfg() {
     const card = $('#sheet-card');
@@ -250,6 +251,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
     for (const k of Object.keys(S.kids)) if (!keep.has(k)) delete S.kids[k];
     S.people = draft.people.map((p) => ({ k: p.k, name: p.name.trim(), set: p.set, av: p.av }));
     for (const p of draft.people) {
+      if (p.fresh) S.kids[p.k] = {}; // 새로 넣은 사람은 빈 기록에서 시작
       const kd = kid(p.k);
       kd.missions = p.missions;
       kd.cfg = { ...(kd.cfg || {}), reward: p.reward.trim(), big: p.big };
