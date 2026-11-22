@@ -1,6 +1,6 @@
 // 오프라인 지원: 네트워크 우선, 3초 넘게 안 오면 저장해 둔 것.
 // 이 앱 파일 + 우리가족 앱과 같이 쓰는 파일(스티커 규칙 · 포켓몬/티니핑 방 · 그림)만 다룸.
-const CACHE = 'weekly-mission-v7';
+const CACHE = 'weekly-mission-v8';
 const SHARED = ['stickers-shared.js', 'poke-room.js', 'mission-board.js', 'poke/', 'ping/'].map((p) => new URL('../our-family/' + p, self.location).pathname);
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-180.png', '../our-family/stickers-shared.js', '../our-family/poke-room.js', '../our-family/mission-board.js'].map((u) => new Request(u, { cache: 'reload' })))));

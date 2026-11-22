@@ -66,6 +66,8 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
 .tip > span { font-size: 24px; } .tip b { display: block; font-weight: 400; font-size: 17px; }
 .tip button { margin-left: auto; border: 0; background: none; font-size: 18px; color: var(--muted); padding: 0 4px; }
 .backup { display: flex; gap: 8px; flex-wrap: wrap; }
+.bk-when { margin: 6px 0 0; font-size: 13px; color: #9A7A5A; }
+.welcome .btn.ghost { margin-top: 10px; }
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: #4A2E14; color: #fff; padding: 10px 16px; border-radius: 14px; font-size: 15px; z-index: 60; }
 </style>
 </head>
@@ -119,6 +121,14 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
   const today = () => keyOf(new Date());
   const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const SND = (FS && FS.SND) || { tap() {}, tada() {}, boing() {}, stick() {}, coin() {} };
+  let grownUntil = 0;
+  function grownUp(fn) {
+    if (Date.now() < grownUntil) return fn();
+    const a = 3 + Math.floor(Math.random() * 7), b = 3 + Math.floor(Math.random() * 7);
+    const v = prompt(`🔒 어른 확인 (아이는 엄마·아빠께 보여 주세요)\n${a} × ${b} = ?`);
+    if (v == null) return;
+    if (Number(String(v).trim()) === a * b) { grownUntil = Date.now() + 3 * 60e3; fn(); } else toast('어른만 할 수 있어요 🙂');
+  }
   function toast(t) { const e = h('div', { class: 'toast', text: t }); document.body.append(e); setTimeout(() => e.remove(), 2200); }
 
 
@@ -154,7 +164,8 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
   function render() {
     if (!FS) { $('#main').replaceChildren(h('div', { class: 'card welcome' }, h('div', { class: 'big-e', text: '📶' }), h('p', { text: '처음 한 번은 인터넷이 필요해요. 연결한 뒤 다시 열어 주세요.' }))); return; }
     if (!S.people.length) { $('#people').replaceChildren(); $('#tabs').hidden = true; $('#room-box').hidden = true; roomOff(); boardOff();
-      $('#main').replaceChildren(h('div', { class: 'card welcome' }, h('div', { class: 'big-e', text: '🎯' }), h('p', { text: '아이 이름을 넣고 미션을 골라 주세요.' }), h('button', { class: 'btn', type: 'button', text: '시작하기', onclick: openCfg })));
+      $('#main').replaceChildren(h('div', { class: 'card welcome' }, h('div', { class: 'big-e', text: '🎯' }), h('p', { text: '아이 이름을 넣고 미션을 골라 주세요.' }), h('button', { class: 'btn', type: 'button', text: '시작하기', onclick: openCfg }),
+        h('div', {}, h('button', { class: 'btn ghost', type: 'button', text: '📂 백업 불러오기 (휴대폰을 바꿨을 때)', onclick: importData }))));
       return; }
     if (!person(S.cur)) S.cur = S.people[0].k;
     const k = S.cur;
@@ -187,6 +198,7 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
     const card = h('div', { class: 'card' });
     box.replaceChildren(card);
     boardCtl = window.MissionBoard.mount(card, { kid: k, lang: () => lang, data: () => kid(k), write: (path, v) => write(k, path, v), snd: SND, big: window.innerWidth >= 760,
+      guard: grownUp, giftGuard: (fn) => fn(), // 쉬는 날 · 어제 선물 · 새 판은 어른 확인, 선물 상자는 아이가 바로
       text: { noReward: '선물 미정 (⚙️에서 정해요)', noMs: '⚙️ 설정에서 미션을 골라 주세요' } });
     boardCtl.el = card;
   }
@@ -242,7 +254,8 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
       draft.people.length < 4 ? h('button', { type: 'button', class: 'btn ghost', style: 'width:100%;margin-bottom:12px', text: '+ 사람 추가 (최대 4명)', onclick: () => { addPerson(); renderCfg(); } }) : null,
       S.people.length ? h('div', { class: 'pcard' }, h('div', { class: 'row', style: 'margin-bottom:4px' }, h('b', { text: '💾 기록 백업' })),
         h('p', { class: 'sub', text: '휴대폰을 바꾸거나 기록이 지워져도 다시 불러올 수 있어요. 가끔 저장해 두세요.' }),
-        h('div', { class: 'backup' }, h('button', { type: 'button', class: 'btn ghost', text: '💾 백업 파일 저장', onclick: exportData }), h('button', { type: 'button', class: 'btn ghost', text: '📂 백업 불러오기', onclick: importData }))) : null,
+        h('div', { class: 'backup' }, h('button', { type: 'button', class: 'btn ghost', text: '💾 백업 파일 저장', onclick: exportData }), h('button', { type: 'button', class: 'btn ghost', text: '📂 백업 불러오기', onclick: importData })),
+        h('p', { class: 'bk-when', text: backupAt() ? `마지막 백업: ${new Date(backupAt()).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}` : '아직 백업을 안 했어요' })) : null,
       h('button', { type: 'button', class: 'btn', style: 'width:100%;padding:13px;font-size:18px', text: '저장', onclick: saveCfg }));
   }
   function saveCfg() {
@@ -257,19 +270,25 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
       kd.cfg = { ...(kd.cfg || {}), reward: p.reward.trim(), big: p.big };
     }
     if (!person(S.cur)) S.cur = S.people[0].k;
+    if (!lsGet('weekly-mission:firstAt')) lsSet('weekly-mission:firstAt', Date.now());
     save(); closeCfg(); roomOff(); boardOff(); render(); toast('저장했어요');
   }
-  /* ── 💾 백업: 기록은 이 기기에만 있어서 파일로 저장 · 불러오기 ── */
+  /* ── 💾 백업: 기록은 이 기기에만 있어서 파일로 저장 · 불러오기. 마지막 백업 때 · 처음 쓴 때는 이 기기에 (한 달마다 알림) ── */
+  const lsGet = (key) => { try { return Number(localStorage.getItem(key)) || 0; } catch { return 0; } };
+  const lsSet = (key, v) => { try { localStorage.setItem(key, String(v)); } catch {} };
+  const backupAt = () => lsGet('weekly-mission:backupAt');
+  function markBackup() { lsSet('weekly-mission:backupAt', Date.now()); showTip(); if (draft) renderCfg(); }
+  if (S.people.length && !lsGet('weekly-mission:firstAt')) lsSet('weekly-mission:firstAt', Date.now());
   async function exportData() {
     const txt = JSON.stringify({ app: 'weekly-mission', v: 1, at: Date.now(), data: { people: S.people, kids: S.kids } });
     const name = `주간미션-백업-${today()}.json`;
     try {
       const file = new File([txt], name, { type: 'application/json' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); toast('백업 파일을 저장했어요'); return; }
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); markBackup(); toast('백업 파일을 저장했어요'); return; }
     } catch (e) { if (e && e.name === 'AbortError') return; }
     const a = h('a', { href: URL.createObjectURL(new Blob([txt], { type: 'application/json' })), download: name });
     document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-    toast('백업 파일을 저장했어요');
+    markBackup(); toast('백업 파일을 저장했어요');
   }
   // 백업 파일은 밖에서 온 것: 사람 4명 · 아는 칸만 받고, 숫자여야 하는 칸은 숫자로 (이상한 파일이면 null)
   function cleanBackup(d) {
@@ -285,6 +304,8 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
       if (k.missions != null && !Array.isArray(k.missions)) delete k.missions;
       if (Array.isArray(k.missions)) k.missions = k.missions.filter((x) => obj(x) && typeof x.id === 'string').map((x) => ({ ...x, text: x.text == null ? undefined : String(x.text).slice(0, 40) }));
       for (const g of ['cfg', 'mdone', 'room']) if (k[g] != null && !obj(k[g])) delete k[g];
+      for (const g of ['stickers', 'golds']) if (obj(k[g])) for (const x of Object.values(k[g])) x.at = Number(x.at) || 0;
+      if (k.cfg) k.cfg = { reward: String(k.cfg.reward || '').slice(0, 30), big: Math.min(8, Math.max(2, Math.round(Number(k.cfg.big)) || 4)), start: Number(k.cfg.start) || 0 };
       kids[p.k] = k;
     }
     return { people, kids };
@@ -312,11 +333,16 @@ input[type="text"] { font: inherit; font-size: 17px; border: 2px solid var(--lin
   function showTip() {
     let off = false;
     try { off = localStorage.getItem('weekly-mission:tip') === 'off'; } catch {}
-    if (standalone() || off) { $('#tip').replaceChildren(); return; }
+    const since = backupAt() || lsGet('weekly-mission:firstAt'), snooze = lsGet('weekly-mission:bkSnooze');
+    const bk = S.people.length && since && Date.now() - since > 30 * 864e5 && Date.now() > snooze
+      ? h('div', { class: 'tip' }, h('span', { text: '💾' }), h('div', {}, h('b', { text: backupAt() ? '한 달 넘게 백업을 안 했어요' : '기록을 백업해 두세요' }), '기록은 이 휴대폰에만 있어요. 파일로 저장해 두면 휴대폰을 바꿔도 다시 불러올 수 있어요. ',
+          h('button', { type: 'button', class: 'btn', style: 'margin-top:6px', text: '💾 지금 백업', onclick: exportData })),
+        h('button', { type: 'button', 'aria-label': '나중에', text: '✕', onclick: () => { lsSet('weekly-mission:bkSnooze', Date.now() + 7 * 864e5); showTip(); } })) : null;
+    if (standalone() || off) { $('#tip').replaceChildren(...(bk ? [bk] : [])); return; }
     const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     $('#tip').replaceChildren(h('div', { class: 'tip' }, h('span', { text: '📲' }),
       h('div', {}, h('b', { text: '홈 화면에 추가해 주세요' }), ios ? 'Safari 아래 [공유] → [홈 화면에 추가]. 그래야 기록이 안전하게 남아요.' : '브라우저 메뉴(⋮) → [홈 화면에 추가]. 그래야 기록이 안전하게 남아요.'),
-      h('button', { type: 'button', 'aria-label': '닫기', text: '✕', onclick: () => { try { localStorage.setItem('weekly-mission:tip', 'off'); } catch {} showTip(); } })));
+      h('button', { type: 'button', 'aria-label': '닫기', text: '✕', onclick: () => { try { localStorage.setItem('weekly-mission:tip', 'off'); } catch {} showTip(); } })), ...(bk ? [bk] : []));
   }
   showTip();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch {} // 기록을 함부로 지우지 말아 달라고 브라우저에 부탁
